@@ -19,12 +19,27 @@
         scheduleStates: ["Defined", "In-Progress", "Completed", "Accepted"],
 
         PI_SETTING: "portfolioItemPicker",
+        
+        layout: {
+            type: 'hbox',
+            align: 'stretch'
+        },
 
         items: [
             {
                 xtype: 'container',
-                itemId: 'header',
-                cls: 'header'
+                itemId: 'left',
+                width: 400
+            },
+            {
+                xtype: 'container',
+                itemId: 'right',
+                flex: 1,
+                items: [{
+                    xtype: 'container',
+                    itemId: 'header',
+                    cls: 'header'
+                }]
             }
         ],
 
@@ -126,7 +141,7 @@
 
             var portfolioItemRef = this.getSetting(this.PI_SETTING);
             var store = Ext.create("Rally.data.wsapi.Store", {
-                model: "Portfolio Item",
+                model: Rally.util.Ref.getTypeFromRef(portfolioItemRef),
                 filters: [
                     {
                         property: "ObjectID",
@@ -185,6 +200,33 @@
         _savedPortfolioItemValid: function (savedPi) {
             return !!(savedPi && savedPi._type && savedPi.ObjectID && savedPi.Name);
         },
+        
+        _onSelectionChange: function(grid, selected) {
+            this.down('rallychart').destroy();
+            this.chartComponentConfig.storeConfig.find._ItemHierarchy = {
+                $in: _.map(selected, function(record) {
+                    return record.getId();    
+                })
+            };
+            this.down('#right').add(this.chartComponentConfig);
+        },
+        
+        _onChildrenRetrieved: function(store, records) {
+            var grid = this.down('#left').add({
+                xtype: 'rallygrid',
+                store: store,
+                columnCfgs: ['FormattedID', 'Name'],
+                showPagingToolbar: false,
+                showRowActionsColumn: false,
+                selType: 'checkboxmodel',
+                selModel: {
+                    mode: 'SIMPLE'
+                },
+                enableEditing: false
+            });
+            grid.getSelectionModel().selectAll(true);
+            grid.on('selectionchange', this._onSelectionChange, this);
+        },
 
         _onPortfolioItemRetrieved: function (store) {
             var storeData = store.getAt(0),
@@ -194,6 +236,15 @@
                 this._portfolioItemNotValid();
                 return;
             }
+            
+            storeData.getCollection(storeData.self.ordinal === 0 ? 'UserStories' : 'Children', {
+                autoLoad: true,
+                listeners: {
+                    load: this._onChildrenRetrieved,
+                    scope: this
+                },
+                limit: Infinity
+            });
 
             if (portfolioItemRecord) {
                 Rally.data.ModelFactory.getModel({
@@ -211,7 +262,7 @@
         _onUserStoryModelRetrieved: function (model, portfolioItemRecord) {
             this._updateChartComponentConfig(model, portfolioItemRecord).then({
                 success: function (chartComponentConfig) {
-                    this.add(chartComponentConfig);
+                    this.down('#right').add(chartComponentConfig);
                     Rally.environment.getMessageBus().publish(Rally.Message.piChartAppReady);
                 },
                 scope: this
@@ -260,7 +311,8 @@
         _setDynamicConfigValues: function (portfolioItem) {
             this._updateChartConfigDateFormat();
             this.chartComponentConfig.chartConfig.title = this._buildChartTitle(portfolioItem);
-            this.chartComponentConfig.chartConfig.subtitle = this._buildChartSubtitle(portfolioItem);
+            //TODO: uncomment this line prior to deploy
+            //this.chartComponentConfig.chartConfig.subtitle = this._buildChartSubtitle(portfolioItem);
 
             this.chartComponentConfig.calculatorConfig.chartAggregationType = this._getAggregationType();
             this.chartComponentConfig.chartConfig.yAxis[0].title.text = this._getYAxisTitle();

@@ -23,3 +23,13 @@
 .portfolio-hierarchy-app .rally-help-icon {
     float: right;
 }
+
+.portfolio-hierarchy-app .current-project-only-float {
+    float: left;
+}
+
+.portfolio-hierarchy-app .filter-on-release-float {
+    float: left;
+    margin-left: 10px;
+    margin-right: 8px;
+}

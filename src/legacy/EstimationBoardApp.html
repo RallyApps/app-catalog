@@ -119,19 +119,27 @@
                 columns = columns.sort(that._numericSort);
                 return columns;
             };
-        
+                
             this._getItems = function(callback) {
         
                 //Build types based on checkbox selections
+                var panelContext = rally.sdk.util.Context.getPanelContext();
                 var queries = [];
                 dojo.forEach(checkBoxes, function(checkBox) {
                     if (checkBox.getChecked()) {
-                        queries.push({key:checkBox.getValue(),
+                        var query = {key:checkBox.getValue(),
                             type: checkBox.getValue(),
                             fetch: "Name,FormattedID,Owner,ObjectID,Rank,PlanEstimate,Children,Ready,Blocked",
-                            query: '(ScheduleState < Accepted)',
+                            query: "(ScheduleState < Accepted)",
                             order: "Rank"
-                        });
+                        };
+                        if(panelContext.timeboxFilter) {
+                            query.query = "(" + query.query + " AND " + panelContext.timeboxFilter.query.toString() + ")";
+                        }
+                        if(checkBox.getValue() === 'HierarchicalRequirement') {
+                            query.query = "(" + query.query + " AND (Children.ObjectID = null))";     
+                        }
+                        queries.push(query);
                     }
                 });
         
@@ -139,13 +147,7 @@
                     var items = [];
                     rally.forEach(queries, function(query) {
                         if (results[query.key]) {
-                            rally.forEach(results[query.key], function(item) {
-                                //exclude epic stories since estimates cannot be altered
-                                if ((item._type !== 'HierarchicalRequirement') ||
-                                        (item._type === 'HierarchicalRequirement' && item.Children.length === 0)) {
-                                    items = items.concat(item);
-                                }
-                            });
+                            items = items.concat(results[query.key]);
                         }
                     });
         
@@ -225,11 +227,16 @@
                 //Refresh board
                 this._refreshBoard();
             };
+            
+            this.refresh = function() {
+                this._refreshBoard();
+            };
         }
     /**
          Copyright (c) 2011  Rally Software Development Corp.  All rights reserved
          */
         
+
         EstimationBoardSettings = function(rallyDataSource, sizes, prefs) {
             rally.sdk.ComponentBase.call(this);
         
@@ -658,6 +665,7 @@
         projectOid = projectOid.indexOf("__") !== -1 ? "723030" : projectOid;
         var workspaceOid = '__WORKSPACE_OID__';
         workspaceOid = workspaceOid.indexOf("__") !== -1 ? "722746" : workspaceOid;
+        var estimationBoard;
 
         function onLoad() {
             var rallyDataSource = new rally.sdk.data.RallyDataSource(
@@ -667,7 +675,7 @@
                     '__PROJECT_SCOPING_DOWN__');
             rallyDataSource.projectOid = projectOid;
 
-            var settings, estimationBoard, sizes, prefs;
+            var settings, sizes, prefs;
 
             //get pref settings exist, use them otherwise use default settings
             function processPref(results) {
@@ -710,6 +718,10 @@
                 estimationBoard = new EstimationBoard(rallyDataSource, settingsShow, sizes);
                 estimationBoard.display(dojo.body());
             }
+        }
+        
+        function onDashboardPageTimeboxFilterChanged(args) {
+            estimationBoard.refresh();
         }
 
         rally.addOnLoad(onLoad);
