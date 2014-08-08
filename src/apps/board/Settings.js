@@ -23,7 +23,7 @@
                     shouldRespondToScopeChange: true,
                     context: context,
                     storeConfig: {
-                        model: 'TypeDefinition',
+                        model: Ext.identityFn('TypeDefinition'),
                         sorters: [
                             {
                                 property: 'Name'
@@ -37,7 +37,8 @@
                             }
                         ],
                         autoLoad: false,
-                        remoteSort: false
+                        remoteSort: false,
+                        remoteFilter: true
                     },
                     displayField: 'DisplayName',
                     valueField: 'TypePath',
@@ -46,14 +47,13 @@
                             combo.fireEvent('typeselected', records[0].get('TypePath'), combo.context);
                         },
                         ready: function(combo) {
-
                             combo.store.sort('DisplayName');
 
                             Rally.data.ModelFactory.getModels({
                                 context: combo.context.getDataContext(),
                                 types: _.pull(_.map(combo.store.getRange(), function(record) {
-                                    return record.get('TypePath');
-                                        }), 'Milestone'),
+									return record.get('TypePath');
+								}), 'Milestone'),
                                 success: function(models) {
                                     combo.store.filterBy(function(record) {
                                         return models[record.get('TypePath')].hasField('FormattedID');
@@ -84,8 +84,8 @@
                     listeners: {
                         ready: function(combo) {
                             combo.store.filterBy(function(record) {
-                                var field = record.get('fieldDefinition');
-                                return field && !field.readOnly && field.hasAllowedValues();
+                                var attr = record.get('fieldDefinition').attributeDefinition;
+                                return attr && !attr.ReadOnly && attr.Constrained && attr.AttributeType !== 'COLLECTION';
                             });
                             var fields = Ext.Array.map(combo.store.getRange(), function(record) {
                                 return record.get(combo.getValueField());
