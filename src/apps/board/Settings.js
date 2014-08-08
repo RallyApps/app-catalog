@@ -51,9 +51,9 @@
 
                             Rally.data.ModelFactory.getModels({
                                 context: combo.context.getDataContext(),
-                                types: Ext.Array.map(combo.store.getRange(), function(record) {
+                                types: _.pull(_.map(combo.store.getRange(), function(record) {
                                     return record.get('TypePath');
-                                }),
+                                        }), 'Milestone'),
                                 success: function(models) {
                                     combo.store.filterBy(function(record) {
                                         return models[record.get('TypePath')].hasField('FormattedID');
