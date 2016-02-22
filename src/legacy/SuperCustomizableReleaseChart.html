@@ -21,7 +21,15 @@
     var MASHUP_TYPE = RALLY.Mashup.RELEASE;
     var SETTINGS_COOKIE_NAME = 'mu_super_customizable_release_settings';
 </script>
-
+<script>
+function toggle() {
+ if( document.getElementById("hidethis").style.display=='none' ){
+   document.getElementById("hidethis").style.display = '';
+ }else{
+   document.getElementById("hidethis").style.display = 'none';
+ }
+}
+</script>
 <script type="text/javascript">
 /*
  Copyright (c) 2002-2010  Rally Software Development Corp. All rights reserved.
@@ -1720,7 +1728,7 @@ function initPage() {
 </head>
 <body>
 <div style="float:right" id="help"></div>
-<div style="float:left" id="title" class="titlebar">Super Customizable Release Chart</div>
+<div style="float:left" id="title" class="titlebar">Super Customizable Release Chart - <a href="javascript:toggle();">Toggle Config</a></div>
 <table>
     <tr>
         <td style="text-align: left; width: 99%;">
@@ -1750,7 +1758,7 @@ function initPage() {
 
 <table cellspacing="10" border="1">
     <tr>
-        <td valign="top">
+        <td id=“hidethis” style=“display:none” valign="top">
 
             <fieldset>
                 <legend>Chart Type</legend>
