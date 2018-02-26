@@ -194,7 +194,8 @@
                     if(results.users.hasOwnProperty(u)) {
                         var days;
 
-                        if (userHash.get(results.users[u].DisplayName, 'Total') > 0) {
+                        if (!(results.users[u].DisplayName === null || results.users[u].DisplayName === undefined) 
+						&& userHash.get(results.users[u].DisplayName, 'Total') > 0) {
                             userCounter += 1;
                             tbl += '<tr>';
                             tbl += '<td class="rly-left">' + results.users[u].DisplayName + '</td>';
