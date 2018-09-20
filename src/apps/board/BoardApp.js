@@ -28,7 +28,8 @@
             defaultSettings: {
                 type: 'HierarchicalRequirement',
                 groupByField: 'ScheduleState',
-                showRows: false
+                showRows: false,
+                searchAllProjects: false,
             }
         },
 
@@ -46,8 +47,12 @@
         },
 
         _getGridBoardConfig: function() {
-            var context = this.getContext(),
-                modelNames = [this.getSetting('type')],
+            var context = this.getContext();
+            var dataContext = context.getDataContext();
+            if (this.searchAllProjects()) {
+                dataContext.project = null;
+            }
+            var modelNames = [this.getSetting('type')],
                 blackListFields = ['Successors', 'Predecessors', 'DisplayColor'],
                 whiteListFields = ['Milestones', 'Tags'],
                 config = {
@@ -103,7 +108,8 @@
                     context: context,
                     modelNames: modelNames,
                     storeConfig: {
-                        filters: this._getFilters()
+                        filters: this._getFilters(),
+                        context: dataContext
                     },
                     listeners: {
                         load: this._onLoad,
@@ -162,7 +168,11 @@
         },
 
         getSettingsFields: function() {
-            return Rally.apps.board.Settings.getFields(this.getContext());
+            var config = {
+                context: this.getContext(),
+                showSearchAllProjects: this.isMilestoneScoped()
+            }
+            return Rally.apps.board.Settings.getFields(config);
         },
 
         _shouldDisableRanking: function() {
@@ -195,6 +205,21 @@
             }
 
             return queries;
-        }
+        },
+        
+        isMilestoneScoped: function() {
+            var result = false;
+            
+            var tbscope = this.getContext().getTimeboxScope();
+            if (tbscope && tbscope.getType() == 'milestone') {
+                result = true;
+            }
+            return result
+        },
+        
+        searchAllProjects: function() {
+            var searchAllProjects = this.getSetting('searchAllProjects');
+            return this.isMilestoneScoped() && searchAllProjects;
+        },
     });
 })();
