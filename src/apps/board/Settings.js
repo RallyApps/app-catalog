@@ -12,13 +12,21 @@
             'Rally.data.wsapi.Filter'
         ],
 
-        getFields: function (context) {
+        getFields: function (config) {
             return [
+                {
+                  id:'searchAllProjects',
+                  name:'searchAllProjects',
+                  fieldLabel: 'Scope Across Workspace',
+                  labelAlign: 'left',
+                  xtype:'rallycheckboxfield',
+                  hidden: !config.showSearchAllProjects
+                },
                 {
                     name: 'type',
                     xtype: 'rallycombobox',
                     shouldRespondToScopeChange: true,
-                    context: context,
+                    context: config.context,
                     storeConfig: {
                         model: Ext.identityFn('TypeDefinition'),
                         sorters: [
@@ -129,7 +137,7 @@
                             });
                         }
                     },
-                    initialValue: context.getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled ? 'DragAndDropRank' : 'Rank'
+                    initialValue: config.context.getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled ? 'DragAndDropRank' : 'Rank'
                 },
                 {
                     type: 'query'
