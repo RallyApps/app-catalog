@@ -41,7 +41,7 @@
                     Completed: {wip: ''},
                     Accepted: {wip: ''}
                 }),
-                cardFields: 'FormattedID,Name,Owner,Discussion,Tasks,Defects', //remove with COLUMN_LEVEL_FIELD_PICKER_ON_KANBAN_SETTINGS
+                cardFields: 'FormattedID,Name,Owner,Discussion,Tasks,Defects,Iteration,State', //remove with COLUMN_LEVEL_FIELD_PICKER_ON_KANBAN_SETTINGS
                 hideReleasedCards: false,
                 showCardAge: true,
                 cardAgeThreshold: 3,
@@ -415,6 +415,9 @@
                 var setting = columnSetting[column.getValue()];
                 if (setting && setting.scheduleStateMapping) {
                     card.getRecord().set('ScheduleState', setting.scheduleStateMapping);
+                }
+                if (setting && setting.defectStateMapping) {
+                    card.getRecord().set('State', setting.defectStateMapping);
                 }
             }
         },
