@@ -2,7 +2,7 @@
     var Ext = window.Ext4 || window.Ext;
 
     /**
-     * Allows configuration of wip and schedule state mapping for kanban columns
+     * Allows configuration of wip, schedule state, and defect state mapping for kanban columns
      *
      *      @example
      *      Ext.create('Ext.Container', {
@@ -54,7 +54,7 @@
             this.callParent(arguments);
 
             this._store = Ext.create('Ext.data.Store', {
-                fields: ['column', 'shown', 'wip', 'scheduleStateMapping', 'cardFields'],
+                fields: ['column', 'shown', 'wip', 'scheduleStateMapping', 'defectStateMapping', 'cardFields'],
                 data: []
             });
 
@@ -128,6 +128,26 @@
                         xtype: 'rallyfieldvaluecombobox',
                         model: Ext.identityFn('HierarchicalRequirement'),
                         field: 'ScheduleState',
+                        listeners: {
+                            ready: function (combo) {
+                                var noMapping = {};
+                                noMapping[combo.displayField] = '--No Mapping--';
+                                noMapping[combo.valueField] = '';
+
+                                combo.store.insert(0, [noMapping]);
+                            }
+                        }
+                    }
+                },
+                {
+                    text: 'Defect State Mapping',
+                    dataIndex: 'defectStateMapping',
+                    emptyCellText: '--No Mapping--',
+                    flex: 2,
+                    editor: {
+                        xtype: 'rallyfieldvaluecombobox',
+                        model: Ext.identityFn('Defect'),
+                        field: 'State',
                         listeners: {
                             ready: function (combo) {
                                 var noMapping = {};
@@ -233,7 +253,8 @@
                 if (record.get('shown')) {
                     columns[record.get('column')] = {
                         wip: record.get('wip'),
-                        scheduleStateMapping: record.get('scheduleStateMapping')
+                        scheduleStateMapping: record.get('scheduleStateMapping'),
+                        defectStateMapping: record.get('defectStateMapping')
                     };
                     if (this.shouldShowColumnLevelFieldPicker) {
                         var cardFields = this._getCardFields(record.get('cardFields'));
@@ -284,6 +305,7 @@
                 shown: false,
                 wip: '',
                 scheduleStateMapping: '',
+                defectStateMapping: '',
                 cardFields: this.defaultCardFields
             };
 
@@ -291,7 +313,8 @@
                 Ext.apply(column, {
                     shown: true,
                     wip: pref.wip,
-                    scheduleStateMapping: pref.scheduleStateMapping
+                    scheduleStateMapping: pref.scheduleStateMapping,
+                    defectStateMapping: pref.defectStateMapping
                 });
 
                 if (pref.cardFields) {

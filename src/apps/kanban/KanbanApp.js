@@ -416,6 +416,9 @@
                 if (setting && setting.scheduleStateMapping) {
                     card.getRecord().set('ScheduleState', setting.scheduleStateMapping);
                 }
+                if (setting && setting.defectStateMapping) {
+                    card.getRecord().set('State', setting.defectStateMapping);
+                }
             }
         },
 
