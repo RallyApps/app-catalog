@@ -2,7 +2,7 @@
     var Ext = window.Ext4 || window.Ext;
 
     /**
-     * Allows configuration of wip and schedule state mapping for kanban columns
+     * Allows configuration of wip, schedule state, and defect state mapping for kanban columns
      *
      *      @example
      *      Ext.create('Ext.Container', {

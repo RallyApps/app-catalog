@@ -30,7 +30,7 @@
 }
 
 .kanban {
-  overflow-y: auto;
+  overflow-y: hidden;
 }
 
 .print-page {
@@ -42,7 +42,6 @@
       & > table {
         position: absolute; // So that there isn't a page-break between the column headers and the actual columns
         width: calc(~"100% - 24px"); // correct alignment
-        overflow-y: auto; // Trying to get the settings to allow scrolling when something other than ScheduleState is used for Columns
       }
     }
   }
